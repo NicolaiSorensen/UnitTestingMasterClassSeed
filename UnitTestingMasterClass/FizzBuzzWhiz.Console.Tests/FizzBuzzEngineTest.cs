@@ -1,4 +1,6 @@
-﻿namespace FizzBuzzWhiz.Console.Test
+﻿using AutoFixture.Kernel;
+
+namespace FizzBuzzWhiz.Console.Test
 {
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -60,7 +62,7 @@
             }
 
             [Theory]
-            [AutoData]
+            [AutoDataWithCustomization(typeof(PrimeEvaluationRelay))]
             public void Should_not_treat_one_as_prime(FizzBuzzEngine sut)
             {
                 var result = sut.Convert(1);
@@ -76,10 +78,12 @@
         public void Customize(IFixture fixture)
         {
             var generator = fixture.Create<Generator<int>>();
-            
-            var number = generator.First(FizzBuzzEngine.IsPrime);
+
+            var primeEvaluationEngine = new PrimeEvaluation();
+            var number = generator.First(primeEvaluationEngine.IsPrime);
 
             fixture.Inject(number);
+            fixture.Register<IPrimeEvaluation>(() => new PrimeEvaluation());
         }
     }
 
@@ -98,6 +102,7 @@
             var number = generator.First(x => x % _factor == 0 && x != _factor);
 
             fixture.Inject(number);
+            fixture.Register<IPrimeEvaluation>(() => new PrimeEvaluation());
         }
     }
 
@@ -107,9 +112,25 @@
         {
             var generator = fixture.Create<Generator<int>>();
 
-            var number = generator.First(x => x % 3 != 0 && x % 5 != 0 && !FizzBuzzEngine.IsPrime(x));
+            var number = generator.First(x =>
+            {
+                var primeEvaluationEngine = new PrimeEvaluation();
+                return x % 3 != 0 && x % 5 != 0 && !primeEvaluationEngine.IsPrime(x);
+            });
 
             fixture.Inject(number);
+            fixture.Register<IPrimeEvaluation>(() => new PrimeEvaluation());
+        }
+    }
+
+    public class PrimeEvaluationRelay : ICustomization
+    {
+        public void Customize(IFixture fixture)
+        {
+            fixture.Customizations.Add(
+                new TypeRelay(
+                    typeof(IPrimeEvaluation),
+                    typeof(PrimeEvaluation)));
         }
     }
 }

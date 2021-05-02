@@ -63,7 +63,7 @@ Input Result
 5 FizzWhiz
 6 Buzz
 
-Kata Round 4
+Kata Round 5
 Allow the user to configure custom rules
 ● “Beez” if the number is divisible by 2
 
