@@ -4,6 +4,7 @@ namespace FizzBuzzWhiz.Console
 {
     public class FizzBuzzEngine
     {
+        public const string Whiz = "Whizz";
         private readonly IPrimeEvaluation _primeEvaluation;
 
         public FizzBuzzEngine(IPrimeEvaluation primeEvaluation)
@@ -16,7 +17,7 @@ namespace FizzBuzzWhiz.Console
             var result = string.Empty;
             result += number % 3 == 0 ? "Fizz" : string.Empty;
             result += number % 5 == 0 ? "Buzz" : string.Empty;
-            result += _primeEvaluation.IsPrime(number) ? "Whiz" : string.Empty;
+            result += _primeEvaluation.IsPrime(number) ? Whiz : string.Empty;
 
             if (result == string.Empty)
             {

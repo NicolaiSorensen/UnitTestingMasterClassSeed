@@ -1,11 +1,9 @@
 ﻿using AutoFixture.Kernel;
+using Moq;
 
 namespace FizzBuzzWhiz.Console.Test
 {
-    using System;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
-    using System.Reflection;
     using AutoFixture;
     using AutoFixture.Idioms;
     using AutoFixture.Xunit2;
@@ -13,6 +11,7 @@ namespace FizzBuzzWhiz.Console.Test
     using TestUtilities;
     using Xunit;
 
+    [Trait("Category", "UnitTest")]
     public class FizzBuzzEngineTest
     {
         public sealed class Constructor : FizzBuzzEngineTest
@@ -23,7 +22,7 @@ namespace FizzBuzzWhiz.Console.Test
             {
                 var assertion = new GuardClauseAssertion(fixture);
 
-                assertion.Verify(typeof(FizzBuzzEngine).GetConstructors(BindingFlags.Public));
+                assertion.Verify(typeof(FizzBuzzEngine).GetConstructors());
             }
         }
 
@@ -50,8 +49,10 @@ namespace FizzBuzzWhiz.Console.Test
             public void Should_convert_prime_numbers_to_whiz(int number, FizzBuzzEngine sut)
             {
                 var result = sut.Convert(number);
-                result.Should().Contain("Whiz");
+
+                result.Should().BeEquivalentTo(FizzBuzzEngine.Whiz);
             }
+
 
             [Theory]
             [AutoDataWithCustomization(typeof(NumberNotDividedByCustomization))]
@@ -80,7 +81,11 @@ namespace FizzBuzzWhiz.Console.Test
             var generator = fixture.Create<Generator<int>>();
 
             var primeEvaluationEngine = new PrimeEvaluation();
-            var number = generator.First(primeEvaluationEngine.IsPrime);
+            var number = generator.First(x =>
+            {
+                var primeEvaluationEngine = new PrimeEvaluation();
+                return x % 3 != 0 && x % 5 != 0 && primeEvaluationEngine.IsPrime(x);
+            });
 
             fixture.Inject(number);
             fixture.Register<IPrimeEvaluation>(() => new PrimeEvaluation());
